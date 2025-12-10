@@ -23,7 +23,7 @@ export default function Header() {
                             <Link href="/dashboard" className="hover:text-black dark:hover:text-white transition-colors">
                                 Dashboard
                             </Link>
-                            <Link href="#" className="hover:text-black dark:hover:text-white transition-colors">
+                            <Link href="/history" className="hover:text-black dark:hover:text-white transition-colors">
                                 History
                             </Link>
                         </div>

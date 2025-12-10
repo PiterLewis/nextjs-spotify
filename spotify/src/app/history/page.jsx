@@ -1,112 +1,188 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { savePlaylistToSpotify } from '@/lib/spotify';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-export default function HistoryPanel({ history, onRestore, onDiscard, onSaveToSpotify }) {
-    const [isOpen, setIsOpen] = useState(false);
+export default function HistoryPage() {
+    const [history, setHistory] = useState([]);
     const [savingId, setSavingId] = useState(null);
+    const [toast, setToast] = useState(null); // { message, type: 'success' | 'error' }
+    const router = useRouter();
 
-    const handleSave = async (entry) => {
+    useEffect(() => {
+        const saved = localStorage.getItem('mix_history');
+        if (saved) {
+            setHistory(JSON.parse(saved));
+        }
+    }, []);
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
+    const handleRestore = (entry) => {
+        localStorage.setItem('restore_mix', JSON.stringify(entry.tracks));
+        router.push('/dashboard');
+    };
+
+    const handleDiscard = (id) => {
+        if (!window.confirm("Are you sure you want to delete this mix?")) return;
+        const updated = history.filter(h => h.id !== id);
+        setHistory(updated);
+        localStorage.setItem('mix_history', JSON.stringify(updated));
+        showToast('Mix deleted', 'success');
+    };
+
+    const handleSaveToSpotify = async (entry) => {
         setSavingId(entry.id);
         try {
-            await onSaveToSpotify(entry);
+            await savePlaylistToSpotify(entry.tracks, entry.name);
+
+            // Update saved status locally
+            const updated = history.map(h =>
+                h.id === entry.id ? { ...h, saved: true } : h
+            );
+            setHistory(updated);
+            localStorage.setItem('mix_history', JSON.stringify(updated));
+            showToast('Playlist saved to Spotify successfully!', 'success');
         } catch (e) {
             console.error(e);
+            showToast(`Error saving: ${e.message}. Try logging in again.`, 'error');
         } finally {
             setSavingId(null);
         }
     };
 
     return (
-        <>
-            {/* Botón flotante o en la UI para abrir historial */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 left-6 z-40 bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-3 rounded-full shadow-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform"
-            >
-                <span>📜 History</span>
-                <span className="bg-green-500 text-black text-xs px-2 py-0.5 rounded-full">
-                    {history.length}
-                </span>
-            </button>
+        <div className="min-h-screen bg-[#121212] text-white p-6 md:p-12 font-sans selection:bg-green-500 selection:text-black">
+            {/* Toast Notification */}
+            {toast && (
+                <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-5 duration-300 flex items-center gap-3 font-bold ${toast.type === 'success' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
+                    }`}>
+                    <span>{toast.type === 'success' ? '✅' : '⚠️'}</span>
+                    {toast.message}
+                </div>
+            )}
 
-            {/* Panel Lateral (Drawer) */}
-            <div className={`fixed inset-y-0 left-0 z-50 w-full md:w-96 bg-white dark:bg-[#121212] shadow-2xl transform transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-gray-800 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div className="p-6 h-full flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold flex items-center gap-2">
-                            Mix History
-                        </h2>
-                        <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full">✕</button>
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-white/10 pb-8">
+                    <div>
+                        <h1 className="text-5xl md:text-6xl font-black mb-2 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
+                            Your Mix History
+                        </h1>
+                        <p className="text-gray-400 text-lg">Relive your past generations and save them for later.</p>
                     </div>
+                    <Link
+                        href="/dashboard"
+                        className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 backdrop-blur-md"
+                    >
+                        <span className="text-gold">Back to Dashboard</span>
+                    </Link>
+                </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
-                        {history.length === 0 ? (
-                            <div className="text-center text-gray-500 mt-10">
-                                <p>No mixes generated yet.</p>
-                                <p className="text-sm mt-2">Generate some music to build your stack!</p>
-                            </div>
-                        ) : (
-                            history.map((entry, index) => (
-                                <div key={entry.id} className="bg-gray-50 dark:bg-[#181818] rounded-xl p-4 border border-gray-200 dark:border-gray-800 relative group">
-                                    {/* Etiqueta de "Latest" para el primero */}
+                {/* Grid Content */}
+                {history.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-32 text-center opacity-50">
+                        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center text-4xl mb-6">
+                            🕸️
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">No mixes yet</h2>
+                        <p className="text-gray-400">Go to the dashboard and start mixing!</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        {history.map((entry, index) => (
+                            <div
+                                key={entry.id}
+                                className="group bg-[#181818] hover:bg-[#202020] rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/10 border border-white/5 flex flex-col"
+                            >
+                                {/* Cover Art Collage */}
+                                <div className="aspect-square w-full bg-[#282828] rounded-2xl mb-5 overflow-hidden relative shadow-lg">
                                     {index === 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-green-500 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
-                                            NEWEST
-                                        </span>
-                                    )}
-
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <h3 className="font-bold text-lg">{entry.name}</h3>
-                                            <p className="text-xs text-gray-500">{entry.timestamp}</p>
-                                            <p className="text-xs text-gray-400 mt-1">
-                                                {entry.mood} • {entry.tracks.length} tracks
-                                            </p>
+                                        <div className="absolute top-3 right-3 z-10 bg-green-500 text-black text-xs font-black px-3 py-1 rounded-full shadow-lg">
+                                            NEW
                                         </div>
-                                    </div>
-
-                                    {/* Preview pequeña de 3 portadas */}
-                                    <div className="flex -space-x-2 mb-4 overflow-hidden py-1">
+                                    )}
+                                    <div className="grid grid-cols-2 h-full w-full">
                                         {entry.tracks.slice(0, 4).map((t, i) => (
                                             <img
                                                 key={i}
-                                                src={t.album.images[2]?.url || t.album.images[0]?.url}
-                                                className="w-8 h-8 rounded-full border-2 border-white dark:border-[#181818]"
+                                                src={t.album.images[1]?.url || t.album.images[0]?.url}
+                                                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                                alt="Album Art"
                                             />
                                         ))}
                                     </div>
+                                    {/* Play Overlay */}
+                                    <button
+                                        onClick={() => handleRestore(entry)}
+                                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]"
+                                    >
+                                        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+                                            <svg className="w-8 h-8 text-black fill-current ml-1" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </div>
 
-                                    {/* Botonera de Acciones */}
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button
-                                            onClick={() => onRestore(entry)}
-                                            className="col-span-2 py-2 text-sm bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg font-medium transition-colors"
-                                        >
-                                            Load to Player
-                                        </button>
-                                        <button
-                                            onClick={() => handleSave(entry)}
-                                            disabled={entry.saved || savingId === entry.id}
-                                            className={`py-2 text-sm rounded-lg font-bold transition-all ${entry.saved
-                                                ? 'bg-green-500/20 text-green-500 cursor-default'
-                                                : 'bg-green-500 hover:bg-green-600 text-black'
-                                                }`}
-                                        >
-                                            {savingId === entry.id ? 'Saving...' : entry.saved ? 'Saved ✓' : 'Save to Spotify'}
-                                        </button>
-                                        <button
-                                            onClick={() => onDiscard(entry.id)}
-                                            className="py-2 text-sm bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40 rounded-lg font-medium transition-colors"
-                                        >
-                                            Discard
-                                        </button>
+                                {/* Info */}
+                                <div className="flex-1 mb-6">
+                                    <h3 className="text-xl font-bold mb-1 truncate text-white group-hover:text-green-400 transition-colors">
+                                        {entry.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                                        <span className="capitalize px-2 py-0.5 bg-white/5 rounded-md">{entry.mood}</span>
+                                        <span>•</span>
+                                        <span>{entry.tracks.length} tracks</span>
+                                        <span>•</span>
+                                        <span>{entry.timestamp.split(',')[0]}</span>
                                     </div>
                                 </div>
-                            ))
-                        )}
+
+                                {/* Actions */}
+                                <div className="grid grid-cols-2 gap-3 mt-auto">
+                                    <button
+                                        onClick={() => handleSaveToSpotify(entry)}
+                                        disabled={entry.saved || savingId === entry.id}
+                                        className={`col-span-2 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${entry.saved
+                                            ? 'bg-green-500/10 text-green-500 cursor-default border border-green-500/20'
+                                            : 'bg-white text-black hover:bg-green-400 hover:scale-[1.02] active:scale-[0.98]'
+                                            }`}
+                                    >
+                                        {savingId === entry.id ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : entry.saved ? (
+                                            <>✓ Saved to Spotify</>
+                                        ) : (
+                                            <>Save to Spotify</>
+                                        )}
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleRestore(entry)}
+                                        className="py-3 bg-white/5 hover:bg-white/10 rounded-xl font-medium text-sm text-gray-300 transition-colors"
+                                    >
+                                        Edit / Play
+                                    </button>
+                                    <button
+                                        onClick={() => handleDiscard(entry.id)}
+                                        className="py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl font-medium text-sm transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
-        </>
+        </div>
     );
 }

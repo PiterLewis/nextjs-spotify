@@ -31,6 +31,13 @@ export default function Dashboard() {
     useEffect(() => {
         const saved = localStorage.getItem('favorite_tracks');
         if (saved) setFavorites(JSON.parse(saved));
+
+        // Check for restored mix from History page
+        const restored = localStorage.getItem('restore_mix');
+        if (restored) {
+            setPlaylist(JSON.parse(restored));
+            localStorage.removeItem('restore_mix');
+        }
     }, []);
 
     // Debounce search for manual add
@@ -61,6 +68,21 @@ export default function Dashboard() {
         try {
             const tracks = await generatePlaylist(preferences);
             setPlaylist(prev => append ? [...prev, ...tracks] : tracks);
+
+            // Save to History
+            if (tracks.length > 0 && !append) {
+                const newEntry = {
+                    id: Date.now(),
+                    timestamp: new Date().toLocaleString(),
+                    name: `Mix ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                    tracks: tracks,
+                    mood: preferences.mood,
+                    saved: false
+                };
+                const history = JSON.parse(localStorage.getItem('mix_history') || '[]');
+                const updated = [newEntry, ...history].slice(0, 50);
+                localStorage.setItem('mix_history', JSON.stringify(updated));
+            }
         } catch (error) {
             console.error("Error generating playlist:", error);
         } finally {
