@@ -8,12 +8,12 @@ import ThemeToggle from '@/components/ThemeToggle'; // Asegúrate de importar es
 export default function Home() {
   const router = useRouter();
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (isAuthenticated()) {
       router.push('/dashboard');
     }
   }, [router]);
-
+  */
   const handleLogin = () => {
     window.location.href = getSpotifyAuthUrl();
   };

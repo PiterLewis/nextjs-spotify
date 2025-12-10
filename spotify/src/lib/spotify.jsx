@@ -110,10 +110,16 @@ export async function generatePlaylist(preferences) {
 
     console.log(`Tracks collected before filtering: ${finalTracks.length}`);
 
+    // ID de tracks seleccionados para protegerlos de los filtros
+    const selectedTrackIds = new Set(tracks ? tracks.map(t => t.id) : []);
+
     // 4. Filtro por Década
     if (decade && decade !== 'all') {
         const startYear = parseInt(decade);
         finalTracks = finalTracks.filter(t => {
+            // Siempre mantener los tracks seleccionados manualmente
+            if (selectedTrackIds.has(t.id)) return true;
+
             if (!t.album.release_date) return false;
             const year = parseInt(t.album.release_date.substring(0, 4));
             return year >= startYear && year < startYear + 10;
@@ -127,7 +133,10 @@ export async function generatePlaylist(preferences) {
         else if (popularity === 'popular') { min = 40; max = 80; }
         else if (popularity === 'underground') { min = 0; max = 40; }
 
-        finalTracks = finalTracks.filter(t => t.popularity >= min && t.popularity <= max);
+        finalTracks = finalTracks.filter(t => {
+            if (selectedTrackIds.has(t.id)) return true;
+            return t.popularity >= min && t.popularity <= max;
+        });
     }
 
     // 6. Filtro por Mood (Audio Features) - CON PROTECCIÓN CONTRA ERROR 403
@@ -164,6 +173,8 @@ export async function generatePlaylist(preferences) {
             // Solo filtramos si NO falló la petición
             if (!failedToFetchFeatures) {
                 finalTracks = finalTracks.filter(track => {
+                    if (selectedTrackIds.has(track.id)) return true;
+
                     const f = featuresMap.get(track.id);
                     if (!f) return true; // Si no hay features por error puntual, mantenemos la canción
 
@@ -202,4 +213,51 @@ export async function generatePlaylist(preferences) {
     }
 
     return result;
+}
+
+export async function savePlaylistToSpotify(tracks, name = "My AI Mix") {
+    const token = await getValidToken();
+    if (!token) throw new Error("No access token");
+
+    // 1. Obtener ID del usuario actual
+    const userRes = await fetch('https://api.spotify.com/v1/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!userRes.ok) throw new Error("Failed to fetch user profile");
+    const userData = await userRes.json();
+    const userId = userData.id;
+
+    // 2. Crear la Playlist vacía
+    const createRes = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: name,
+            description: "Generated with Spotify Taste Mixer 🎛️",
+            public: false
+        })
+    });
+    if (!createRes.ok) throw new Error("Failed to create playlist");
+    const playlistData = await createRes.json();
+
+    // 3. Añadir las canciones (Usando URIs)
+    const trackUris = tracks.map(t => t.uri); // spotify:track:xxxx
+
+    const addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistData.id}/tracks`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            uris: trackUris
+        })
+    });
+
+    if (!addRes.ok) throw new Error("Failed to add tracks");
+
+    return playlistData; // Retornamos datos de la nueva playlist
 }
