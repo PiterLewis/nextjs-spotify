@@ -3,51 +3,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { searchSpotify } from '@/lib/spotify';
 
-export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isGameMode = false }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const debounceTimeout = useRef(null);
-
-    useEffect(() => {
-        if (searchTerm.length < 2) {
-            setSearchResults([]);
-            return;
-        }
-
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
-
-        setIsLoading(true);
-        debounceTimeout.current = setTimeout(async () => {
-            try {
-                const data = await searchSpotify(searchTerm, 'artist', 5);
-                if (data && data.artists) {
-                    setSearchResults(data.artists.items);
-                }
-            } catch (error) {
-                console.error('Error searching artists:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        }, 500); // 500ms debounce
-
-        return () => clearTimeout(debounceTimeout.current);
-    }, [searchTerm]);
-
-    const toggleArtist = (artist) => {
-        const isSelected = selectedArtists.some(a => a.id === artist.id);
-        if (isSelected) {
-            onArtistSelect(selectedArtists.filter(a => a.id !== artist.id));
-        } else {
-            if (selectedArtists.length >= 5) return;
-            onArtistSelect([...selectedArtists, artist]);
-        }
-    };
-
-    const Content = () => (
+function ArtistSearchContent({
+    searchTerm,
+    setSearchTerm,
+    isGameMode,
+    isLoading,
+    searchResults,
+    selectedArtists,
+    toggleArtist
+}) {
+    return (
         <>
             <div className="p-6 border-b border-gray-200 dark:border-white/10">
                 <input
@@ -99,9 +64,64 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
             </div>
         </>
     );
+}
+
+export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isGameMode = false }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const debounceTimeout = useRef(null);
+
+    useEffect(() => {
+        if (searchTerm.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+
+        if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+        }
+
+        setIsLoading(true);
+        debounceTimeout.current = setTimeout(async () => {
+            try {
+                const data = await searchSpotify(searchTerm, 'artist', 5);
+                if (data && data.artists) {
+                    setSearchResults(data.artists.items);
+                }
+            } catch (error) {
+                console.error('Error searching artists:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }, 500); // 500ms debounce
+
+        return () => clearTimeout(debounceTimeout.current);
+    }, [searchTerm]);
+
+    const toggleArtist = (artist) => {
+        const isSelected = selectedArtists.some(a => a.id === artist.id);
+        if (isSelected) {
+            onArtistSelect(selectedArtists.filter(a => a.id !== artist.id));
+        } else {
+            if (selectedArtists.length >= 5) return;
+            onArtistSelect([...selectedArtists, artist]);
+        }
+    };
 
     if (isGameMode) {
-        return <Content />;
+        return (
+            <ArtistSearchContent
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                isGameMode={isGameMode}
+                isLoading={isLoading}
+                searchResults={searchResults}
+                selectedArtists={selectedArtists}
+                toggleArtist={toggleArtist}
+            />
+        );
     }
 
     return (
@@ -162,7 +182,15 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
                             </button>
                         </div>
 
-                        <Content />
+                        <ArtistSearchContent
+                            searchTerm={searchTerm}
+                            setSearchTerm={setSearchTerm}
+                            isGameMode={isGameMode}
+                            isLoading={isLoading}
+                            searchResults={searchResults}
+                            selectedArtists={selectedArtists}
+                            toggleArtist={toggleArtist}
+                        />
 
                         <div className="p-6 border-t border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-white/5 rounded-b-3xl">
                             <span className="text-sm text-gray-500">

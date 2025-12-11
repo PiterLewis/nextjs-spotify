@@ -11,19 +11,15 @@ const MOODS = [
     { label: 'Focus', value: 'focus', icon: '🧠' },
 ];
 
-export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = false }) {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const currentMood = MOODS.find(m => m.value === selectedMood) || MOODS[0];
-
-    const Content = () => (
+function MoodSelectionContent({ selectedMood, onMoodSelect, isGameMode, setIsOpen }) {
+    return (
         <div className="grid grid-cols-2 gap-3 p-4">
             {MOODS.map(mood => (
                 <button
                     key={mood.value}
                     onClick={() => {
                         onMoodSelect(mood.value);
-                        if (!isGameMode) setIsOpen(false);
+                        if (!isGameMode && setIsOpen) setIsOpen(false);
                     }}
                     className={`w-full px-4 py-3 text-left text-sm font-medium transition-all rounded-xl flex items-center gap-2 ${selectedMood === mood.value
                         ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/25 scale-105'
@@ -36,9 +32,22 @@ export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = fa
             ))}
         </div>
     );
+}
+
+export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = false }) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const currentMood = MOODS.find(m => m.value === selectedMood) || MOODS[0];
 
     if (isGameMode) {
-        return <Content />;
+        return (
+            <MoodSelectionContent
+                selectedMood={selectedMood}
+                onMoodSelect={onMoodSelect}
+                isGameMode={isGameMode}
+                setIsOpen={null}
+            />
+        );
     }
 
     return (
@@ -78,22 +87,12 @@ export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = fa
                         onClick={() => setIsOpen(false)}
                     ></div>
                     <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-white/10 z-20 overflow-hidden">
-                        {MOODS.map(mood => (
-                            <button
-                                key={mood.value}
-                                onClick={() => {
-                                    onMoodSelect(mood.value);
-                                    setIsOpen(false);
-                                }}
-                                className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/10 flex items-center gap-2 ${selectedMood === mood.value
-                                    ? 'bg-yellow-50 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-300'
-                                    : 'text-gray-700 dark:text-gray-300'
-                                    }`}
-                            >
-                                <span>{mood.icon}</span>
-                                {mood.label}
-                            </button>
-                        ))}
+                        <MoodSelectionContent
+                            selectedMood={selectedMood}
+                            onMoodSelect={onMoodSelect}
+                            isGameMode={isGameMode}
+                            setIsOpen={setIsOpen}
+                        />
                     </div>
                 </>
             )}

@@ -96,13 +96,13 @@ const STEPS = [
         position: 92,
         type: 'finish',
         label: 'Castle',
-        icon: null // The castle image is already there
+        icon: null
     }
 ];
 
 export default function GamePage() {
     const [gameStarted, setGameStarted] = useState(false);
-    const [wizardPosition, setWizardPosition] = useState(5); // Percentage
+    const [wizardPosition, setWizardPosition] = useState(5);
     const [activeStep, setActiveStep] = useState(null);
     const [completedSteps, setCompletedSteps] = useState([]);
     const [playlistData, setPlaylistData] = useState({
@@ -119,7 +119,6 @@ export default function GamePage() {
     const handleObjectClick = (step) => {
         setWizardPosition(step.position);
 
-        // Wait for wizard to arrive (approximate duration based on distance, but fixed for simplicity)
         setTimeout(async () => {
             if (step.type === 'widget') {
                 setActiveStep(step);
@@ -135,7 +134,7 @@ export default function GamePage() {
                     setIsGenerating(false);
                 }
             }
-        }, 1000); // 1 second travel time
+        }, 1000);
     };
 
     const handleWidgetComplete = (key, data) => {
@@ -166,10 +165,8 @@ export default function GamePage() {
 
     return (
         <main className="relative w-full h-screen overflow-hidden transition-colors duration-500 font-sans">
-            {/* Layer 0: Sky Gradient */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#0EA5E9] to-[#BAE6FD] dark:from-[#020617] dark:to-[#312E81] transition-colors duration-500 -z-50"></div>
 
-            {/* Layer 1: Clouds (Animated) */}
             <div className="absolute inset-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                 <div className="absolute top-10 left-0 w-[200%] h-full animate-float-clouds dark:hidden opacity-80">
                     <div className="w-1/2 h-full absolute top-0 left-0 bg-[url('/nubeslight.svg')] bg-repeat-x bg-contain"></div>
@@ -181,7 +178,6 @@ export default function GamePage() {
                 </div>
             </div>
 
-            {/* Layer 2: Castle */}
             <div
                 className="absolute bottom-[10%] md:bottom-[15%] lg:bottom-[20%] xl:bottom-[25%] right-0 z-10 w-full max-w-sm md:max-w-lg lg:max-w-xl xl:max-w-2xl transition-all duration-500 cursor-pointer hover:scale-105"
                 onClick={() => gameStarted && handleObjectClick(STEPS[STEPS.length - 1])}
@@ -193,7 +189,6 @@ export default function GamePage() {
                 />
             </div>
 
-            {/* Layer 3: Ground */}
             <div className="absolute bottom-0 left-0 w-full z-20">
                 <img
                     src="/BACKGROUND.svg"
@@ -202,13 +197,8 @@ export default function GamePage() {
                 />
             </div>
 
-            {/* Game Layer: Objects & Wizard */}
             {gameStarted && (
                 <div className="absolute bottom-[15%] md:bottom-[20%] lg:bottom-[25%] left-0 w-full h-32 z-30 px-10">
-                    {/* Path Line (Optional visual guide) */}
-                    {/* <div className="absolute bottom-2 left-0 w-full h-1 bg-white/20 border-t border-dashed border-white/50"></div> */}
-
-                    {/* Interactive Objects */}
                     {STEPS.filter(s => s.type === 'widget').map((step) => (
                         <div
                             key={step.id}
@@ -224,7 +214,6 @@ export default function GamePage() {
                         </div>
                     ))}
 
-                    {/* Wizard Character */}
                     <div
                         className="absolute bottom-0 transform -translate-x-1/2 transition-all duration-1000 ease-in-out z-40"
                         style={{ left: `${wizardPosition}%` }}
@@ -234,7 +223,6 @@ export default function GamePage() {
                             alt="Wizard"
                             className="h-24 md:h-32 w-auto drop-shadow-2xl"
                         />
-                        {/* Speech Bubble Hint */}
                         {wizardPosition === 5 && (
                             <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white text-black px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap animate-pulse">
                                 Click an item to start!
@@ -244,15 +232,14 @@ export default function GamePage() {
                 </div>
             )}
 
-            {/* UI Overlay: Welcome Screen */}
             {!gameStarted && (
                 <div className="relative z-50 w-full h-full flex flex-col items-center justify-start pt-20 px-4">
                     <div className="bg-white/80 dark:bg-black/60 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-white/20 max-w-2xl text-center animate-in fade-in zoom-in duration-500">
                         <h1 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-300 dark:to-orange-500 drop-shadow-sm">
-                            Kingdom of Sound
+                            Reino de la música
                         </h1>
                         <p className="text-xl text-gray-700 dark:text-gray-200 mb-8 font-medium">
-                            Help the wizard collect the musical elements to build the perfect playlist.
+                            Crea tu playlist a través de tu camino musical.
                         </p>
 
                         <div className="flex gap-4 justify-center">
@@ -276,7 +263,6 @@ export default function GamePage() {
                 </div>
             )}
 
-            {/* Game Modal */}
             <GameModal
                 isOpen={!!activeStep}
                 onClose={() => setActiveStep(null)}
@@ -320,8 +306,8 @@ export default function GamePage() {
                                         onClick={handleSaveToHistory}
                                         disabled={isSaved}
                                         className={`text-sm font-bold px-4 py-2 rounded-full transition-all ${isSaved
-                                                ? 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
-                                                : 'bg-green-500 text-black hover:bg-green-600 hover:scale-105'
+                                            ? 'bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400'
+                                            : 'bg-green-500 text-black hover:bg-green-600 hover:scale-105'
                                             }`}
                                     >
                                         {isSaved ? 'Saved! Redirecting...' : 'Save to History'}
@@ -359,14 +345,13 @@ export default function GamePage() {
                 )}
             </GameModal>
 
-            {/* Character Toggle Button */}
             {gameStarted && (
                 <button
                     onClick={() => setIsSpanishWizard(!isSpanishWizard)}
                     className="absolute top-4 right-4 z-50 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full transition-all shadow-lg border border-white/30"
                     title="Toggle Wizard Skin"
                 >
-                    <span className="text-xl">🧙‍♂️</span>
+                    <span className="text-xl">🇪🇸</span>
                 </button>
             )}
         </main>

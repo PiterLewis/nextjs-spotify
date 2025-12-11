@@ -40,7 +40,7 @@ export default function HistoryPage() {
         try {
             await savePlaylistToSpotify(entry.tracks, entry.name);
 
-            // Update saved status locally
+
             const updated = history.map(h =>
                 h.id === entry.id ? { ...h, saved: true } : h
             );
@@ -57,7 +57,7 @@ export default function HistoryPage() {
 
     return (
         <div className="min-h-screen bg-white dark:bg-[#121212] text-black dark:text-white p-6 md:p-12 font-sans selection:bg-green-500 selection:text-black transition-colors duration-300">
-            {/* Toast Notification */}
+
             {toast && (
                 <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-5 duration-300 flex items-center gap-3 font-bold ${toast.type === 'success' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
                     }`}>
@@ -67,7 +67,7 @@ export default function HistoryPage() {
             )}
 
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
+
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-gray-200 dark:border-white/10 pb-8">
                     <div>
                         <h1 className="text-5xl md:text-6xl font-black mb-2 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-emerald-700 dark:from-green-400 dark:to-emerald-600">
@@ -83,7 +83,7 @@ export default function HistoryPage() {
                     </Link>
                 </div>
 
-                {/* Grid Content */}
+
                 {history.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 text-center opacity-50">
                         <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center text-4xl mb-6">
@@ -99,7 +99,7 @@ export default function HistoryPage() {
                                 key={entry.id}
                                 className="group bg-white dark:bg-[#181818] hover:bg-gray-50 dark:hover:bg-[#202020] rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/10 border border-gray-200 dark:border-white/5 flex flex-col"
                             >
-                                {/* Cover Art Collage */}
+
                                 <div className="aspect-square w-full bg-gray-200 dark:bg-[#282828] rounded-2xl mb-5 overflow-hidden relative shadow-lg">
                                     {index === 0 && (
                                         <div className="absolute top-3 right-3 z-10 bg-green-500 text-black text-xs font-black px-3 py-1 rounded-full shadow-lg">
@@ -116,7 +116,7 @@ export default function HistoryPage() {
                                             />
                                         ))}
                                     </div>
-                                    {/* Play Overlay */}
+
                                     <button
                                         onClick={() => handleRestore(entry)}
                                         className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]"
@@ -129,7 +129,7 @@ export default function HistoryPage() {
                                     </button>
                                 </div>
 
-                                {/* Info */}
+
                                 <div className="flex-1 mb-6">
                                     <h3 className="text-xl font-bold mb-1 truncate text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                                         {entry.name}
@@ -143,7 +143,7 @@ export default function HistoryPage() {
                                     </div>
                                 </div>
 
-                                {/* Actions */}
+
                                 <div className="grid grid-cols-2 gap-3 mt-auto">
                                     <button
                                         onClick={() => handleSaveToSpotify(entry)}
