@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { searchSpotify } from '@/lib/spotify';
 
-export default function ArtistWidget({ selectedArtists = [], onArtistSelect }) {
+export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isGameMode = false }) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -47,6 +47,63 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect }) {
         }
     };
 
+    const Content = () => (
+        <>
+            <div className="p-6 border-b border-gray-200 dark:border-white/10">
+                <input
+                    type="text"
+                    placeholder="Search artists..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-white/5 border-none focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                    autoFocus={isGameMode}
+                />
+            </div>
+
+            <div className="p-6 overflow-y-auto min-h-[300px]">
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-full">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {searchResults.map(artist => {
+                            const isSelected = selectedArtists.some(a => a.id === artist.id);
+                            return (
+                                <button
+                                    key={artist.id}
+                                    onClick={() => toggleArtist(artist)}
+                                    disabled={!isSelected && selectedArtists.length >= 5}
+                                    className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-4 ${isSelected
+                                        ? 'bg-green-500 text-black shadow-lg shadow-green-500/25'
+                                        : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300'
+                                        } ${!isSelected && selectedArtists.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {artist.images?.[2]?.url ? (
+                                        <img src={artist.images[2].url} alt={artist.name} className="w-10 h-10 rounded-full object-cover" />
+                                    ) : (
+                                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">🎤</div>
+                                    )}
+                                    <span className="flex-1 font-bold text-lg">{artist.name}</span>
+                                    {isSelected && <span>✓</span>}
+                                </button>
+                            );
+                        })}
+                        {searchTerm.length >= 2 && searchResults.length === 0 && !isLoading && (
+                            <div className="text-center py-8 text-gray-500">
+                                No artists found matching "{searchTerm}"
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </>
+    );
+
+    if (isGameMode) {
+        return <Content />;
+    }
+
     return (
         <>
             <div
@@ -54,7 +111,12 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect }) {
                 className="group bg-white dark:bg-white/5 backdrop-blur-lg rounded-3xl p-6 border border-gray-200 dark:border-white/10 hover:border-green-500/50 dark:hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 hover:-translate-y-1 cursor-pointer relative overflow-hidden"
             >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span className="text-8xl">🎤</span>
+                    <svg width="126" height="120" viewBox="0 0 126 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-24">
+                        <path d="M81.3171 69.9409L10.8171 118.941C10.8171 118.941 3.86739 118.893 1.81714 116.94C-0.233114 114.987 0.317139 108.941 0.317139 108.941L54.8171 40.4409L59.3171 17.4409V12.4409L64.8171 7.94092C64.8171 7.94092 98.2648 -12.0581 117.817 12.4409C137.369 36.9399 114.317 61.9409 114.317 61.9409L109.317 66.9409L102.817 64.9409L81.3171 69.9409Z" fill="#C5FFCA" />
+                        <path d="M81.3171 69.9409L10.8171 118.941C10.8171 118.941 3.86739 118.893 1.81714 116.94C-0.233114 114.987 0.317139 108.941 0.317139 108.941L54.8171 40.4409M81.3171 69.9409L102.817 64.9409L109.317 66.9409L114.317 61.9409C114.317 61.9409 137.369 36.9399 117.817 12.4409C98.2648 -12.0581 64.8171 7.94092 64.8171 7.94092L59.3171 12.4409V17.4409L54.8171 40.4409M81.3171 69.9409L54.8171 40.4409" stroke="black" strokeWidth="0.5" />
+                        <path d="M109.25 66.7495L59.25 12.7495L64.25 8.24951L114.25 61.7495L109.25 66.7495Z" fill="#00E861" stroke="black" strokeWidth="0.5" />
+                        <path d="M11.25 118.75L0.75 108.25L3.25 105.25L14.25 116.75L11.25 118.75Z" fill="#00E861" stroke="black" strokeWidth="0.2" />
+                    </svg>
                 </div>
                 <div className="flex items-center justify-between mb-6 relative z-10">
                     <h2 className="text-2xl font-bold flex items-center gap-3">
@@ -100,54 +162,7 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect }) {
                             </button>
                         </div>
 
-                        <div className="p-6 border-b border-gray-200 dark:border-white/10">
-                            <input
-                                type="text"
-                                placeholder="Search artists..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-white/5 border-none focus:ring-2 focus:ring-green-500 outline-none transition-all"
-                                autoFocus
-                            />
-                        </div>
-
-                        <div className="p-6 overflow-y-auto min-h-[300px]">
-                            {isLoading ? (
-                                <div className="flex justify-center items-center h-full">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {searchResults.map(artist => {
-                                        const isSelected = selectedArtists.some(a => a.id === artist.id);
-                                        return (
-                                            <button
-                                                key={artist.id}
-                                                onClick={() => toggleArtist(artist)}
-                                                disabled={!isSelected && selectedArtists.length >= 5}
-                                                className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all text-left flex items-center gap-4 ${isSelected
-                                                    ? 'bg-green-500 text-black shadow-lg shadow-green-500/25'
-                                                    : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300'
-                                                    } ${!isSelected && selectedArtists.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                {artist.images?.[2]?.url ? (
-                                                    <img src={artist.images[2].url} alt={artist.name} className="w-10 h-10 rounded-full object-cover" />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">🎤</div>
-                                                )}
-                                                <span className="flex-1 font-bold text-lg">{artist.name}</span>
-                                                {isSelected && <span>✓</span>}
-                                            </button>
-                                        );
-                                    })}
-                                    {searchTerm.length >= 2 && searchResults.length === 0 && !isLoading && (
-                                        <div className="text-center py-8 text-gray-500">
-                                            No artists found matching "{searchTerm}"
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                        <Content />
 
                         <div className="p-6 border-t border-gray-200 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-white/5 rounded-b-3xl">
                             <span className="text-sm text-gray-500">

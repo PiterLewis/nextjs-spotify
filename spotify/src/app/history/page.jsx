@@ -56,7 +56,7 @@ export default function HistoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#121212] text-white p-6 md:p-12 font-sans selection:bg-green-500 selection:text-black">
+        <div className="min-h-screen bg-white dark:bg-[#121212] text-black dark:text-white p-6 md:p-12 font-sans selection:bg-green-500 selection:text-black transition-colors duration-300">
             {/* Toast Notification */}
             {toast && (
                 <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-5 duration-300 flex items-center gap-3 font-bold ${toast.type === 'success' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'
@@ -68,39 +68,39 @@ export default function HistoryPage() {
 
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-white/10 pb-8">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6 border-b border-gray-200 dark:border-white/10 pb-8">
                     <div>
-                        <h1 className="text-5xl md:text-6xl font-black mb-2 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-600">
+                        <h1 className="text-5xl md:text-6xl font-black mb-2 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-emerald-700 dark:from-green-400 dark:to-emerald-600">
                             Your Mix History
                         </h1>
-                        <p className="text-gray-400 text-lg">Relive your past generations and save them for later.</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg">Relive your past generations and save them for later.</p>
                     </div>
                     <Link
                         href="/dashboard"
-                        className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-full font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 backdrop-blur-md"
+                        className="px-8 py-3 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 rounded-full font-bold transition-all hover:scale-105 active:scale-95 flex items-center gap-2 backdrop-blur-md text-gray-900 dark:text-white"
                     >
-                        <span className="text-gold">Back to Dashboard</span>
+                        <span>Back to Dashboard</span>
                     </Link>
                 </div>
 
                 {/* Grid Content */}
                 {history.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 text-center opacity-50">
-                        <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center text-4xl mb-6">
+                        <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center text-4xl mb-6">
                             🕸️
                         </div>
                         <h2 className="text-2xl font-bold mb-2">No mixes yet</h2>
-                        <p className="text-gray-400">Go to the dashboard and start mixing!</p>
+                        <p className="text-gray-500 dark:text-gray-400">Go to the dashboard and start mixing!</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                         {history.map((entry, index) => (
                             <div
                                 key={entry.id}
-                                className="group bg-[#181818] hover:bg-[#202020] rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/10 border border-white/5 flex flex-col"
+                                className="group bg-white dark:bg-[#181818] hover:bg-gray-50 dark:hover:bg-[#202020] rounded-3xl p-5 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-900/10 border border-gray-200 dark:border-white/5 flex flex-col"
                             >
                                 {/* Cover Art Collage */}
-                                <div className="aspect-square w-full bg-[#282828] rounded-2xl mb-5 overflow-hidden relative shadow-lg">
+                                <div className="aspect-square w-full bg-gray-200 dark:bg-[#282828] rounded-2xl mb-5 overflow-hidden relative shadow-lg">
                                     {index === 0 && (
                                         <div className="absolute top-3 right-3 z-10 bg-green-500 text-black text-xs font-black px-3 py-1 rounded-full shadow-lg">
                                             NEW
@@ -131,11 +131,11 @@ export default function HistoryPage() {
 
                                 {/* Info */}
                                 <div className="flex-1 mb-6">
-                                    <h3 className="text-xl font-bold mb-1 truncate text-white group-hover:text-green-400 transition-colors">
+                                    <h3 className="text-xl font-bold mb-1 truncate text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                                         {entry.name}
                                     </h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                                        <span className="capitalize px-2 py-0.5 bg-white/5 rounded-md">{entry.mood}</span>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span className="capitalize px-2 py-0.5 bg-gray-100 dark:bg-white/5 rounded-md">{entry.mood}</span>
                                         <span>•</span>
                                         <span>{entry.tracks.length} tracks</span>
                                         <span>•</span>
@@ -149,8 +149,8 @@ export default function HistoryPage() {
                                         onClick={() => handleSaveToSpotify(entry)}
                                         disabled={entry.saved || savingId === entry.id}
                                         className={`col-span-2 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${entry.saved
-                                            ? 'bg-green-500/10 text-green-500 cursor-default border border-green-500/20'
-                                            : 'bg-white text-black hover:bg-green-400 hover:scale-[1.02] active:scale-[0.98]'
+                                            ? 'bg-green-500/10 text-green-600 dark:text-green-500 cursor-default border border-green-500/20'
+                                            : 'bg-black dark:bg-white text-white dark:text-black hover:bg-green-500 hover:text-black dark:hover:bg-green-400 dark:hover:text-black hover:scale-[1.02] active:scale-[0.98]'
                                             }`}
                                     >
                                         {savingId === entry.id ? (
@@ -167,13 +167,13 @@ export default function HistoryPage() {
 
                                     <button
                                         onClick={() => handleRestore(entry)}
-                                        className="py-3 bg-white/5 hover:bg-white/10 rounded-xl font-medium text-sm text-gray-300 transition-colors"
+                                        className="py-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl font-medium text-sm text-gray-700 dark:text-gray-300 transition-colors"
                                     >
                                         Edit / Play
                                     </button>
                                     <button
                                         onClick={() => handleDiscard(entry.id)}
-                                        className="py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl font-medium text-sm transition-colors"
+                                        className="py-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl font-medium text-sm transition-colors"
                                     >
                                         Delete
                                     </button>

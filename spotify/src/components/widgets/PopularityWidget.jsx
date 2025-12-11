@@ -20,7 +20,12 @@ export default function PopularityWidget({ selectedPopularity, onPopularitySelec
                 className="bg-white dark:bg-white/5 backdrop-blur-lg rounded-2xl p-5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
             >
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                    <span>📊</span> Popularity
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                    </div>
+                    Popularity
                 </h3>
                 <div className="h-12 bg-gray-100 dark:bg-black/40 rounded-lg flex items-center justify-center text-sm font-medium text-gray-500 dark:text-gray-300">
                     {currentLevel.label}
@@ -42,8 +47,8 @@ export default function PopularityWidget({ selectedPopularity, onPopularitySelec
                                     setIsOpen(false);
                                 }}
                                 className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/10 flex items-center gap-2 ${selectedPopularity === level.value
-                                        ? 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-300'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                    ? 'bg-red-50 dark:bg-red-500/20 text-red-600 dark:text-red-300'
+                                    : 'text-gray-700 dark:text-gray-300'
                                     }`}
                             >
                                 <span>{level.icon}</span>

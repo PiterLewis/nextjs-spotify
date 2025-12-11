@@ -25,7 +25,16 @@ export default function DecadeWidget({ selectedDecade, onDecadeSelect }) {
                 className="bg-white dark:bg-white/5 backdrop-blur-lg rounded-2xl p-5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 transition-all cursor-pointer"
             >
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                    <span>📅</span> Decade
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
+                        <defs>
+                            <linearGradient id="clock-gradient" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#60A5FA" />
+                                <stop offset="1" stopColor="#2563EB" />
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#clock-gradient)" fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
+                    </svg>
+                    Decade
                 </h3>
                 <div className="h-12 bg-gray-100 dark:bg-black/40 rounded-lg flex items-center justify-center text-sm font-medium text-gray-500 dark:text-gray-300">
                     {currentLabel}
@@ -47,8 +56,8 @@ export default function DecadeWidget({ selectedDecade, onDecadeSelect }) {
                                     setIsOpen(false);
                                 }}
                                 className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 dark:hover:bg-white/10 ${selectedDecade === decade.value
-                                        ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300'
-                                        : 'text-gray-700 dark:text-gray-300'
+                                    ? 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300'
+                                    : 'text-gray-700 dark:text-gray-300'
                                     }`}
                             >
                                 {decade.label}

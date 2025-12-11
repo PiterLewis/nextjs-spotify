@@ -97,6 +97,33 @@ export async function generatePlaylist(preferences) {
         }
     }
 
+    // 3b. Búsqueda por Mood (Géneros asociados) - REEMPLAZO DE AUDIO FEATURES
+    if (mood) {
+        const moodGenres = {
+            'happy': ['pop', 'dance', 'summer', 'happy'],
+            'sad': ['acoustic', 'piano', 'sad', 'indie-folk'],
+            'energetic': ['rock', 'metal', 'edm', 'work-out'],
+            'calm': ['ambient', 'classical', 'chill', 'sleep']
+        };
+
+        const targetGenres = moodGenres[mood] || [];
+        // Seleccionamos 2 géneros random del mood para no saturar
+        const selectedMoodGenres = targetGenres.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+        for (const genre of selectedMoodGenres) {
+            try {
+                const offset = Math.floor(Math.random() * 50);
+                const res = await fetchWithAuth(
+                    `https://api.spotify.com/v1/search?type=track&q=genre:${encodeURIComponent(genre)}&limit=5&offset=${offset}`
+                );
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.tracks) allTracks.push(...data.tracks.items);
+                }
+            } catch (e) { console.error(e); }
+        }
+    }
+
     // --- DEDUPLICACIÓN (Importante hacerlo antes de filtrar) ---
     const uniqueMap = new Map();
     allTracks.forEach(t => {
@@ -137,67 +164,6 @@ export async function generatePlaylist(preferences) {
             if (selectedTrackIds.has(t.id)) return true;
             return t.popularity >= min && t.popularity <= max;
         });
-    }
-
-    // 6. Filtro por Mood (Audio Features) - CON PROTECCIÓN CONTRA ERROR 403
-    // Solo aplicamos si hay mood y tracks para filtrar
-    if (mood && finalTracks.length > 0) {
-        try {
-            // Chunking para la API (máx 100 ids)
-            const chunks = [];
-            for (let i = 0; i < finalTracks.length; i += 100) {
-                chunks.push(finalTracks.slice(i, i + 100));
-            }
-
-            let featuresMap = new Map();
-            let failedToFetchFeatures = false;
-
-            for (const chunk of chunks) {
-                const ids = chunk.map(t => t.id).join(',');
-                const res = await fetchWithAuth(`https://api.spotify.com/v1/audio-features?ids=${ids}`);
-
-                if (!res.ok) {
-                    console.warn(`Skipping mood filter: API returned ${res.status}`);
-                    failedToFetchFeatures = true;
-                    break; // Si falla uno, asumimos que falla todo (ej: 403 Forbidden)
-                }
-
-                const data = await res.json();
-                if (data.audio_features) {
-                    data.audio_features.forEach(f => {
-                        if (f) featuresMap.set(f.id, f);
-                    });
-                }
-            }
-
-            // Solo filtramos si NO falló la petición
-            if (!failedToFetchFeatures) {
-                finalTracks = finalTracks.filter(track => {
-                    if (selectedTrackIds.has(track.id)) return true;
-
-                    const f = featuresMap.get(track.id);
-                    if (!f) return true; // Si no hay features por error puntual, mantenemos la canción
-
-                    const { energy, valence, danceability } = f;
-                    switch (mood) {
-                        case 'happy':
-                            return valence >= 0.6 && energy >= 0.5;
-                        case 'sad':
-                            return valence <= 0.4;
-                        case 'energetic':
-                            return energy >= 0.7 && danceability >= 0.5;
-                        case 'calm':
-                            return energy <= 0.4 && valence >= 0.4; // Calm but not necessarily sad
-                        default:
-                            return true;
-                    }
-                });
-            }
-
-        } catch (error) {
-            console.warn("Error processing mood filters (ignoring filter):", error);
-            // No hacemos throw, dejamos que finalTracks pase sin filtrar
-        }
     }
 
     // 7. Mezclar y limitar

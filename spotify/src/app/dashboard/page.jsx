@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { generatePlaylist, searchSpotify } from '@/lib/spotify';
 import ArtistWidget from '@/components/widgets/ArtistWidget';
 import GenreWidget from '@/components/widgets/GenreWidget';
@@ -8,6 +9,8 @@ import TrackWidget from '@/components/widgets/TrackWidget';
 import DecadeWidget from '@/components/widgets/DecadeWidget';
 import MoodWidget from '@/components/widgets/MoodWidget';
 import PopularityWidget from '@/components/widgets/PopularityWidget';
+
+
 
 export default function Dashboard() {
     const [preferences, setPreferences] = useState({
@@ -22,8 +25,10 @@ export default function Dashboard() {
     const [favorites, setFavorites] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
 
+
     // Manual Add Track State
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isExportOpen, setIsExportOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -111,11 +116,73 @@ export default function Dashboard() {
         setPlaylist(prev => [...prev, track]);
     };
 
+    const [playingTrackId, setPlayingTrackId] = useState(null);
+    const [audioPlayer, setAudioPlayer] = useState(null);
+
+    useEffect(() => {
+        return () => {
+            if (audioPlayer) audioPlayer.pause();
+        };
+    }, [audioPlayer]);
+
+    const handlePreview = (track) => {
+        if (playingTrackId === track.id) {
+            audioPlayer.pause();
+            setPlayingTrackId(null);
+        } else {
+            if (audioPlayer) audioPlayer.pause();
+            if (track.preview_url) {
+                const audio = new Audio(track.preview_url);
+                audio.play();
+                audio.onended = () => setPlayingTrackId(null);
+                setAudioPlayer(audio);
+                setPlayingTrackId(track.id);
+            } else {
+                alert("No preview available for this track ");
+            }
+        }
+    };
+
+    const handleExport = (format) => {
+        if (playlist.length === 0) return;
+
+        let content, type, extension;
+        if (format === 'json') {
+            content = JSON.stringify(playlist, null, 2);
+            type = 'application/json';
+            extension = 'json';
+        } else {
+            const headers = "Name,Artist,Album,Release Date\n";
+            const rows = playlist.map(t => `"${t.name}","${t.artists.map(a => a.name).join(', ')}","${t.album.name}","${t.album.release_date}"`).join("\n");
+            content = headers + rows;
+            type = 'text/csv';
+            extension = 'csv';
+        }
+
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mi-playlist.${extension}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleShare = () => {
+        if (playlist.length === 0) return;
+        const text = `Mira mi nueva Playlist! \n\n${playlist.slice(0, 5).map(t => `• ${t.name} - ${t.artists[0].name}`).join('\n')}\n\n...and ${playlist.length - 5} more!`;
+        navigator.clipboard.writeText(text);
+        alert("Resumen copiado al portapapeles!");
+    };
+
     return (
         <main className="p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="col-span-1 lg:col-span-12 mb-8">
-                <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-spotify-green to-green-300">Welcome to Your Taste Mixer</h1>
-                <p className="text-gray-400">Mix your favorite elements to create the perfect playlist.</p>
+            <div className="col-span-1 lg:col-span-12 mb-8 flex justify-between items-end">
+                <div>
+                    <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-spotify-green to-green-300">Welcome to Your Taste Mixer</h1>
+                    <p className="text-gray-400">Mix your favorite elements to create the perfect playlist.</p>
+                </div>
+
             </div>
 
             {/* Left Column: Widgets */}
@@ -131,10 +198,12 @@ export default function Dashboard() {
                     />
                 </div>
 
-                <TrackWidget
-                    selectedTracks={preferences.tracks}
-                    onTrackSelect={tracks => setPreferences(p => ({ ...p, tracks }))}
-                />
+                <div className="relative z-30">
+                    <TrackWidget
+                        selectedTracks={preferences.tracks}
+                        onTrackSelect={tracks => setPreferences(p => ({ ...p, tracks }))}
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <DecadeWidget
@@ -171,27 +240,89 @@ export default function Dashboard() {
             <div className="lg:col-span-5 bg-white dark:bg-[#181818] rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-[#282828] h-[calc(100vh-120px)] sticky top-24 flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <span className="text-green-500">💿</span> Your Mix
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
+                            <svg className="w-4 h-4 text-white animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                                <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                            </svg>
+                        </div>
+                        Your Mix
                     </h2>
                     {playlist.length > 0 && (
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-1">
+                            <button
+                                className="p-2 text-gray-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg transition-colors cursor-default"
+                                title="Statistics (Disabled)"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </button>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsExportOpen(!isExportOpen)}
+                                    className={`p-2 rounded-lg transition-colors ${isExportOpen ? 'text-blue-500 bg-blue-50 dark:bg-blue-500/10' : 'text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10'}`}
+                                    title="Export"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </button>
+                                {isExportOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsExportOpen(false)}></div>
+                                        <div className="absolute right-0 top-full mt-2 w-32 bg-white dark:bg-[#282828] rounded-xl shadow-xl border border-gray-200 dark:border-white/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-100">
+                                            <button
+                                                onClick={() => { handleExport('json'); setIsExportOpen(false); }}
+                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/5 text-sm transition-colors"
+                                            >
+                                                JSON
+                                            </button>
+                                            <button
+                                                onClick={() => { handleExport('csv'); setIsExportOpen(false); }}
+                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/5 text-sm transition-colors"
+                                            >
+                                                CSV
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            <button onClick={handleShare} className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg transition-colors" title="Share">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                            </button>
+
+                            <div className="w-px h-6 bg-gray-200 dark:bg-white/10 mx-1"></div>
+
                             <button
                                 onClick={() => setPlaylist([])}
-                                className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                title="Clear Playlist"
                             >
-                                Clear
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
                             </button>
+
                             <button
                                 onClick={() => setIsSearchOpen(true)}
-                                className="text-sm text-green-500 hover:text-green-400 font-medium"
+                                className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg transition-colors"
+                                title="Add Song"
                             >
-                                + Add Song
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
                             </button>
                         </div>
                     )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto pr-2 space-y-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {playlist.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center p-8 opacity-50">
                             <div className="w-32 h-32 rounded-full border-4 border-current mb-4 flex items-center justify-center animate-pulse-slow">
@@ -202,14 +333,22 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         playlist.map((track, idx) => (
-                            <div key={`${track.id}-${idx}`} className="group flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[#282828] transition-colors group">
-                                <img
-                                    src={track.album.images[2]?.url || track.album.images[0]?.url}
-                                    alt={track.name}
-                                    className="w-12 h-12 rounded-md shadow-sm object-cover"
-                                />
+                            <div key={`${track.id}-${idx}`} className="group flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[#282828] transition-colors group relative">
+                                <div className="relative">
+                                    <img
+                                        src={track.album.images[2]?.url || track.album.images[0]?.url}
+                                        alt={track.name}
+                                        className="w-12 h-12 rounded-md shadow-sm object-cover"
+                                    />
+                                    <button
+                                        onClick={() => handlePreview(track)}
+                                        className={`absolute inset-0 bg-black/40 flex items-center justify-center rounded-md transition-opacity ${playingTrackId === track.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                    >
+                                        {playingTrackId === track.id ? '⏸️' : '▶️'}
+                                    </button>
+                                </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-medium truncate text-gray-900 dark:text-white">{track.name}</h3>
+                                    <h3 className={`font-medium truncate ${playingTrackId === track.id ? 'text-green-500' : 'text-gray-900 dark:text-white'}`}>{track.name}</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                         {track.artists.map(a => a.name).join(', ')}
                                     </p>
@@ -310,6 +449,8 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+
         </main>
     );
 }
