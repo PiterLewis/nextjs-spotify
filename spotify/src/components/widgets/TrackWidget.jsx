@@ -8,7 +8,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
     const [results, setResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Debounce search
+    // Debounce 
     useEffect(() => {
         const timeoutId = setTimeout(async () => {
             if (query.length > 2) {
@@ -44,7 +44,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
     };
 
     return (
-        <div className="bg-white dark:bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-xl">
+        <div className="bg-white/60 dark:bg-black/40 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 shadow-xl hover:shadow-[0_0_30px_rgba(29,185,84,0.15)] transition-all duration-500">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                     <svg width="32" height="34" viewBox="0 0 321 343" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
@@ -72,7 +72,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="busca canciones..."
-                    className="w-full bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all"
+                    className="w-full bg-white/50 dark:bg-white/5 border-none rounded-xl px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all placeholder:text-gray-400"
                 />
 
 
@@ -80,7 +80,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                     <div className="absolute right-3 top-3.5 animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
                 )}
 
-                {/* Search Results Dropdown */}
+
                 {results.length > 0 && (
                     <div className="absolute z-[100] w-full mt-2 bg-white/90 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-100 dark:border-white/10 overflow-hidden max-h-60 overflow-y-auto ring-1 ring-black/5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {results.map((track) => (
@@ -107,12 +107,12 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                 )}
             </div>
 
-            {/* Selected Tracks Chips */}
+
             <div className="flex flex-wrap gap-2">
                 {selectedTracks.map((track) => (
                     <div
                         key={track.id}
-                        className="flex items-center gap-2 bg-green-50 dark:bg-green-500/20 text-green-700 dark:text-green-300 px-3 py-1.5 rounded-full text-sm font-medium border border-green-100 dark:border-green-500/30 animate-in fade-in zoom-in duration-200"
+                        className="flex items-center gap-2 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 text-green-700 dark:text-[#1DB954] px-3 py-1.5 rounded-full text-sm font-bold border border-[#1DB954]/20 dark:border-[#1DB954]/30 animate-in fade-in zoom-in duration-200 shadow-[0_0_10px_rgba(29,185,84,0.1)]"
                     >
                         <span className="max-w-[100px] truncate">{track.name}</span>
                         <button

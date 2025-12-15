@@ -26,7 +26,7 @@ export default function Dashboard() {
     const [isGenerating, setIsGenerating] = useState(false);
 
 
-    // Manual Add Track State
+
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isExportOpen, setIsExportOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +37,7 @@ export default function Dashboard() {
         const saved = localStorage.getItem('favorite_tracks');
         if (saved) setFavorites(JSON.parse(saved));
 
-        // Check for restored mix from History page
+
         const restored = localStorage.getItem('restore_mix');
         if (restored) {
             setPlaylist(JSON.parse(restored));
@@ -45,7 +45,7 @@ export default function Dashboard() {
         }
     }, []);
 
-    // Debounce search for manual add
+
     useEffect(() => {
         const timeoutId = setTimeout(async () => {
             if (searchQuery.length > 2) {
@@ -74,7 +74,7 @@ export default function Dashboard() {
             const tracks = await generatePlaylist(preferences);
             setPlaylist(prev => append ? [...prev, ...tracks] : tracks);
 
-            // Save to History
+
             if (tracks.length > 0 && !append) {
                 const newEntry = {
                     id: Date.now(),
@@ -177,15 +177,24 @@ export default function Dashboard() {
 
     return (
         <main className="p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="col-span-1 lg:col-span-12 mb-8 flex justify-between items-end">
-                <div>
-                    <h1 className="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-spotify-green to-green-300">Welcome to Your Taste Mixer</h1>
-                    <p className="text-gray-400">Mix your favorite elements to create the perfect playlist.</p>
-                </div>
+            {/* Ambient Background */}
+            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[#1DB954]/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
+            <div className="col-span-1 lg:col-span-12 mb-12 flex justify-between items-end relative z-10">
+                <div className="max-w-3xl">
+                    <h1 className="text-5xl md:text-7xl font-bold mb-4 tracking-tighter leading-tight">
+                        <span className="block text-black dark:text-white">Design Your</span>
+                        <span className="bg-gradient-to-r from-[#1DB954] via-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+                            Perfect Atmosphere
+                        </span>
+                    </h1>
+                    <p className="text-xl text-gray-500 dark:text-gray-400 font-light max-w-2xl">
+                        Blend your favorite artists, genres, and moods to create a sonic experience that is uniquely yours.
+                    </p>
+                </div>
             </div>
 
-            {/* Left Column: Widgets */}
+
             <div className="lg:col-span-7 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ArtistWidget
@@ -223,21 +232,26 @@ export default function Dashboard() {
                 <button
                     onClick={() => handleGenerate(false)}
                     disabled={isGenerating}
-                    className="w-full py-4 bg-green-500 hover:bg-green-600 text-black font-bold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-5 bg-[#1DB954] hover:bg-[#1ed760] text-black font-bold text-xl rounded-full transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(29,185,84,0.3)] hover:shadow-[0_0_30px_rgba(29,185,84,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative z-20 group"
                 >
                     {isGenerating ? (
                         <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
-                            GENERATING...
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
+                            <span className="tracking-widest">MIXING...</span>
                         </>
                     ) : (
-                        'GENERATE MIX'
+                        <>
+                            <span className="tracking-wide">GENERATE MIX</span>
+                            <svg className="w-6 h-6 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </>
                     )}
                 </button>
             </div>
 
-            {/* Right Column: Playlist */}
-            <div className="lg:col-span-5 bg-white dark:bg-[#181818] rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-[#282828] h-[calc(100vh-120px)] sticky top-24 flex flex-col">
+
+            <div className="lg:col-span-5 bg-white/80 dark:bg-[#121212]/60 backdrop-blur-2xl rounded-[2.5rem] p-8 shadow-2xl border border-gray-200 dark:border-white/5 h-[calc(100vh-120px)] sticky top-24 flex flex-col relative z-20 transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20">
@@ -324,39 +338,44 @@ export default function Dashboard() {
 
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {playlist.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-400 text-center p-8 opacity-50">
-                            <div className="w-32 h-32 rounded-full border-4 border-current mb-4 flex items-center justify-center animate-pulse-slow">
-                                <div className="w-8 h-8 bg-current rounded-full"></div>
+                        <div className="h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 text-center p-8">
+                            <div className="w-40 h-40 rounded-full border-4 border-[#1DB954]/20 mb-6 flex items-center justify-center relative">
+                                <div className="absolute inset-0 bg-[#1DB954]/5 rounded-full blur-xl"></div>
+                                <div className="w-20 h-20 bg-[#1DB954]/20 rounded-full flex items-center justify-center animate-pulse">
+                                    <svg className="w-10 h-10 text-[#1DB954]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                    </svg>
+                                </div>
                             </div>
-                            <p className="text-lg font-medium">Empty Queue</p>
-                            <p className="text-sm">Select your vibe and hit generate to start the music.</p>
+                            <p className="text-xl font-bold mb-2 text-black dark:text-white">Your queue is empty</p>
+                            <p className="text-sm max-w-xs mx-auto opacity-70">Select your vibe from the widgets on the left and hit generate to start the magic.</p>
                         </div>
                     ) : (
                         playlist.map((track, idx) => (
-                            <div key={`${track.id}-${idx}`} className="group flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-[#282828] transition-colors group relative">
-                                <div className="relative">
+                            <div key={`${track.id}-${idx}`} className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-all border border-transparent hover:border-black/5 dark:hover:border-white/5 relative">
+                                <div className="relative shrink-0">
                                     <img
                                         src={track.album.images[2]?.url || track.album.images[0]?.url}
                                         alt={track.name}
-                                        className="w-12 h-12 rounded-md shadow-sm object-cover"
+                                        className="w-14 h-14 rounded-xl shadow-lg object-cover"
                                     />
                                     <button
                                         onClick={() => handlePreview(track)}
-                                        className={`absolute inset-0 bg-black/40 flex items-center justify-center rounded-md transition-opacity ${playingTrackId === track.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                        className={`absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl transition-opacity ${playingTrackId === track.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                                     >
                                         {playingTrackId === track.id ? '⏸️' : '▶️'}
                                     </button>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className={`font-medium truncate ${playingTrackId === track.id ? 'text-green-500' : 'text-gray-900 dark:text-white'}`}>{track.name}</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    <h3 className={`font-bold truncate text-base ${playingTrackId === track.id ? 'text-[#1DB954]' : 'text-gray-900 dark:text-white'}`}>{track.name}</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
                                         {track.artists.map(a => a.name).join(', ')}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={() => toggleFavorite(track)}
-                                        className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-[#3E3E3E] transition-colors ${favorites.some(f => f.id === track.id) ? 'text-green-500' : 'text-gray-400'
+                                        className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors ${favorites.some(f => f.id === track.id) ? 'text-[#1DB954]' : 'text-gray-400'
                                             }`}
                                     >
                                         ♥
@@ -374,7 +393,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* Add Track Modal */}
+
             {isSearchOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-xl max-h-[80vh] flex flex-col shadow-2xl border border-gray-200 dark:border-white/10 animate-in zoom-in-95 duration-200">

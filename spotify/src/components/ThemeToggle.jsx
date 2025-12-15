@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true); // Empezamos en dark por defecto (estilo Spotify)
+  const [isDark, setIsDark] = useState(true); // Empezamos en dark por defecto 
 
   useEffect(() => {
     // Al cargar, verificar si hay preferencia guardada o usar la del sistema

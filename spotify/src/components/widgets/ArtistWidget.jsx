@@ -128,7 +128,7 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
         <>
             <div
                 onClick={() => setIsOpen(true)}
-                className="group bg-white dark:bg-white/5 backdrop-blur-lg rounded-3xl p-6 border border-gray-200 dark:border-white/10 hover:border-green-500/50 dark:hover:border-green-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 hover:-translate-y-1 cursor-pointer relative overflow-hidden"
+                className="group bg-white/60 dark:bg-black/40 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 hover:border-[#1DB954]/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(29,185,84,0.15)] hover:-translate-y-1 cursor-pointer relative overflow-hidden"
             >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <svg width="126" height="120" viewBox="0 0 126 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-24 h-24">
@@ -150,7 +150,7 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
                 {selectedArtists.length > 0 ? (
                     <div className="flex flex-wrap gap-2 relative z-10">
                         {selectedArtists.map(artist => (
-                            <div key={artist.id} className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300 rounded-full text-sm font-medium border border-green-200 dark:border-green-500/30">
+                            <div key={artist.id} className="flex items-center gap-2 px-3 py-1.5 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 text-green-800 dark:text-[#1DB954] rounded-full text-sm font-bold border border-[#1DB954]/20 dark:border-[#1DB954]/30 shadow-[0_0_10px_rgba(29,185,84,0.1)]">
                                 {artist.images?.[2]?.url && (
                                     <img src={artist.images[2].url} alt={artist.name} className="w-4 h-4 rounded-full" />
                                 )}
@@ -159,7 +159,7 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
                         ))}
                     </div>
                 ) : (
-                    <div className="h-40 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 group-hover:border-green-500/30 transition-colors bg-gray-50/50 dark:bg-black/20">
+                    <div className="h-40 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 group-hover:border-[#1DB954]/30 transition-colors bg-gray-50/50 dark:bg-white/5">
                         <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
                             <span className="text-2xl">+</span>
                         </div>
