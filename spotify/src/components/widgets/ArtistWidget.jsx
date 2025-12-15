@@ -47,10 +47,18 @@ function ArtistSearchContent({
                                     {artist.images?.[2]?.url ? (
                                         <img src={artist.images[2].url} alt={artist.name} className="w-10 h-10 rounded-full object-cover" />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">🎤</div>
+                                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                            </svg>
+                                        </div>
                                     )}
                                     <span className="flex-1 font-bold text-lg">{artist.name}</span>
-                                    {isSelected && <span>✓</span>}
+                                    {isSelected && (
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    )}
                                 </button>
                             );
                         })}
@@ -148,22 +156,42 @@ export default function ArtistWidget({ selectedArtists = [], onArtistSelect, isG
                 </div>
 
                 {selectedArtists.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 relative z-10">
-                        {selectedArtists.map(artist => (
-                            <div key={artist.id} className="flex items-center gap-2 px-3 py-1.5 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 text-green-800 dark:text-[#1DB954] rounded-full text-sm font-bold border border-[#1DB954]/20 dark:border-[#1DB954]/30 shadow-[0_0_10px_rgba(29,185,84,0.1)]">
-                                {artist.images?.[2]?.url && (
-                                    <img src={artist.images[2].url} alt={artist.name} className="w-4 h-4 rounded-full" />
-                                )}
-                                <span>{artist.name}</span>
-                            </div>
-                        ))}
+                    <div className="flex flex-col gap-3 relative z-10">
+                        <div className="flex -space-x-4 overflow-hidden py-2 pl-1">
+                            {selectedArtists.map((artist, i) => (
+                                <div key={artist.id} className="relative transition-transform hover:-translate-y-2 hover:z-10 duration-300">
+                                    {artist.images?.[2]?.url ? (
+                                        <img
+                                            src={artist.images[2].url}
+                                            alt={artist.name}
+                                            className="w-14 h-14 rounded-full border-4 border-white dark:border-[#121212] shadow-lg object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-14 h-14 rounded-full border-4 border-white dark:border-[#121212] shadow-lg bg-gray-200 dark:bg-white/10 flex items-center justify-center text-xl">
+                                            <svg className="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {selectedArtists.map(artist => (
+                                <span key={artist.id} className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                                    {artist.name}{selectedArtists.indexOf(artist) !== selectedArtists.length - 1 ? ',' : ''}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                 ) : (
-                    <div className="h-40 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 group-hover:border-[#1DB954]/30 transition-colors bg-gray-50/50 dark:bg-white/5">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-                            <span className="text-2xl">+</span>
+                    <div className="h-40 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 transition-all bg-gray-50/50 dark:bg-white/5 group-hover:bg-[#1DB954]/10 border-2 border-dashed border-gray-200 dark:border-white/10 group-hover:border-[#1DB954]/50">
+                        <div className="w-16 h-16 rounded-full bg-white dark:bg-white/10 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg className="w-8 h-8 text-gray-400 group-hover:text-[#1DB954] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
                         </div>
-                        <span className="text-sm font-medium">Add Artists</span>
+                        <span className="text-sm font-bold group-hover:text-[#1DB954] transition-colors">Add Artists</span>
                     </div>
                 )}
             </div>

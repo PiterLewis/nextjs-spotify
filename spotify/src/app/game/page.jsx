@@ -235,11 +235,11 @@ export default function GamePage() {
             {!gameStarted && (
                 <div className="relative z-50 w-full h-full flex flex-col items-center justify-start pt-20 px-4">
                     <div className="bg-white/80 dark:bg-black/60 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-white/20 max-w-2xl text-center animate-in fade-in zoom-in duration-500">
-                        <h1 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-300 dark:to-orange-500 drop-shadow-sm">
-                            Reino de la música
+                        <h1 className="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#1DB954] via-emerald-400 to-cyan-500 drop-shadow-sm">
+                            Music Quest
                         </h1>
                         <p className="text-xl text-gray-700 dark:text-gray-200 mb-8 font-medium">
-                            Crea tu playlist a través de tu camino musical.
+                            Create your playlist through your musical journey.
                         </p>
 
                         <div className="flex gap-4 justify-center">

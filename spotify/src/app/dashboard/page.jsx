@@ -9,8 +9,21 @@ import TrackWidget from '@/components/widgets/TrackWidget';
 import DecadeWidget from '@/components/widgets/DecadeWidget';
 import MoodWidget from '@/components/widgets/MoodWidget';
 import PopularityWidget from '@/components/widgets/PopularityWidget';
-
-
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableTrack } from '@/components/SortableTrack';
 
 export default function Dashboard() {
     const [preferences, setPreferences] = useState({
@@ -25,18 +38,22 @@ export default function Dashboard() {
     const [favorites, setFavorites] = useState([]);
     const [isGenerating, setIsGenerating] = useState(false);
 
-
-
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isExportOpen, setIsExportOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
     useEffect(() => {
         const saved = localStorage.getItem('favorite_tracks');
         if (saved) setFavorites(JSON.parse(saved));
-
 
         const restored = localStorage.getItem('restore_mix');
         if (restored) {
@@ -44,7 +61,6 @@ export default function Dashboard() {
             localStorage.removeItem('restore_mix');
         }
     }, []);
-
 
     useEffect(() => {
         const timeoutId = setTimeout(async () => {
@@ -74,7 +90,6 @@ export default function Dashboard() {
             const tracks = await generatePlaylist(preferences);
             setPlaylist(prev => append ? [...prev, ...tracks] : tracks);
 
-
             if (tracks.length > 0 && !append) {
                 const newEntry = {
                     id: Date.now(),
@@ -100,9 +115,8 @@ export default function Dashboard() {
     };
 
     const toggleFavorite = (track) => {
-        const isFav = favorites.some(f => f.id === track.id);
         let newFavs;
-        if (isFav) {
+        if (favorites.some(f => f.id === track.id)) {
             newFavs = favorites.filter(f => f.id !== track.id);
         } else {
             newFavs = [...favorites, track];
@@ -138,15 +152,15 @@ export default function Dashboard() {
                 setAudioPlayer(audio);
                 setPlayingTrackId(track.id);
             } else {
-                alert("No preview available for this track ");
+                alert("No preview available for this track");
             }
         }
     };
 
     const handleExport = (format) => {
         if (playlist.length === 0) return;
-
         let content, type, extension;
+
         if (format === 'json') {
             content = JSON.stringify(playlist, null, 2);
             type = 'application/json';
@@ -163,17 +177,30 @@ export default function Dashboard() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `mi-playlist.${extension}`;
+        a.download = `my-playlist.${extension}`;
         a.click();
         URL.revokeObjectURL(url);
     };
 
     const handleShare = () => {
         if (playlist.length === 0) return;
-        const text = `Mira mi nueva Playlist! \n\n${playlist.slice(0, 5).map(t => `• ${t.name} - ${t.artists[0].name}`).join('\n')}\n\n...and ${playlist.length - 5} more!`;
+        const text = `Check out my new Playlist! \n\n${playlist.slice(0, 5).map(t => `• ${t.name} - ${t.artists[0].name}`).join('\n')}\n\n...and ${playlist.length - 5} more!`;
         navigator.clipboard.writeText(text);
-        alert("Resumen copiado al portapapeles!");
+        alert("Summary copied to clipboard!");
     };
+
+    function handleDragEnd(event) {
+        const { active, over } = event;
+
+        if (active.id !== over.id) {
+            setPlaylist((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    }
 
     return (
         <main className="p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -198,52 +225,50 @@ export default function Dashboard() {
             <div className="lg:col-span-7 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ArtistWidget
-                        selectedArtists={preferences.artists}
-                        onArtistSelect={artists => setPreferences(p => ({ ...p, artists }))}
+                        preferences={preferences}
+                        setPreferences={setPreferences}
                     />
                     <GenreWidget
-                        selectedGenres={preferences.genres}
-                        onGenreSelect={genres => setPreferences(p => ({ ...p, genres }))}
+                        preferences={preferences}
+                        setPreferences={setPreferences}
                     />
                 </div>
 
-                <div className="relative z-30">
-                    <TrackWidget
-                        selectedTracks={preferences.tracks}
-                        onTrackSelect={tracks => setPreferences(p => ({ ...p, tracks }))}
-                    />
-                </div>
+                <TrackWidget
+                    preferences={preferences}
+                    setPreferences={setPreferences}
+                />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <DecadeWidget
-                        selectedDecade={preferences.decade}
-                        onDecadeSelect={decade => setPreferences(p => ({ ...p, decade }))}
+                        preferences={preferences}
+                        setPreferences={setPreferences}
                     />
                     <MoodWidget
-                        selectedMood={preferences.mood}
-                        onMoodSelect={mood => setPreferences(p => ({ ...p, mood }))}
+                        preferences={preferences}
+                        setPreferences={setPreferences}
                     />
                     <PopularityWidget
-                        selectedPopularity={preferences.popularity}
-                        onPopularitySelect={popularity => setPreferences(p => ({ ...p, popularity }))}
+                        preferences={preferences}
+                        setPreferences={setPreferences}
                     />
                 </div>
 
                 <button
                     onClick={() => handleGenerate(false)}
                     disabled={isGenerating}
-                    className="w-full py-5 bg-[#1DB954] hover:bg-[#1ed760] text-black font-bold text-xl rounded-full transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(29,185,84,0.3)] hover:shadow-[0_0_30px_rgba(29,185,84,0.5)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 relative z-20 group"
+                    className="w-full py-5 bg-gradient-to-r from-[#1DB954] via-[#1ed760] to-[#1DB954] bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-black font-[var(--font-outfit)] font-black text-xl tracking-[0.15em] rounded-full transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(29,185,84,0.4)] hover:shadow-[0_0_50px_rgba(29,185,84,0.6)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4 relative z-20 group border-2 border-[#1DB954]/50 hover:border-[#1DB954]"
                 >
                     {isGenerating ? (
                         <>
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black"></div>
-                            <span className="tracking-widest">MIXING...</span>
+                            <span className="tracking-[0.2em]">BREWING...</span>
                         </>
                     ) : (
                         <>
-                            <span className="tracking-wide">GENERATE MIX</span>
-                            <svg className="w-6 h-6 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <span>GENERATE MIX</span>
+                            <svg className="w-6 h-6 transition-transform group-hover:rotate-12 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </>
                     )}
@@ -351,44 +376,69 @@ export default function Dashboard() {
                             <p className="text-sm max-w-xs mx-auto opacity-70">Select your vibe from the widgets on the left and hit generate to start the magic.</p>
                         </div>
                     ) : (
-                        playlist.map((track, idx) => (
-                            <div key={`${track.id}-${idx}`} className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-all border border-transparent hover:border-black/5 dark:hover:border-white/5 relative">
-                                <div className="relative shrink-0">
-                                    <img
-                                        src={track.album.images[2]?.url || track.album.images[0]?.url}
-                                        alt={track.name}
-                                        className="w-14 h-14 rounded-xl shadow-lg object-cover"
-                                    />
-                                    <button
-                                        onClick={() => handlePreview(track)}
-                                        className={`absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl transition-opacity ${playingTrackId === track.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                                    >
-                                        {playingTrackId === track.id ? '⏸️' : '▶️'}
-                                    </button>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className={`font-bold truncate text-base ${playingTrackId === track.id ? 'text-[#1DB954]' : 'text-gray-900 dark:text-white'}`}>{track.name}</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
-                                        {track.artists.map(a => a.name).join(', ')}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={() => toggleFavorite(track)}
-                                        className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors ${favorites.some(f => f.id === track.id) ? 'text-[#1DB954]' : 'text-gray-400'
-                                            }`}
-                                    >
-                                        ♥
-                                    </button>
-                                    <button
-                                        onClick={() => removeTrack(track.id)}
-                                        className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 transition-colors"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        ))
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={playlist}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {playlist.map((track, idx) => (
+                                    <SortableTrack key={track.id} id={track.id}>
+                                        <div className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition-all border border-transparent hover:border-black/5 dark:hover:border-white/5 relative cursor-grab active:cursor-grabbing">
+                                            <div className="relative shrink-0">
+                                                <img
+                                                    src={track.album.images[2]?.url || track.album.images[0]?.url}
+                                                    alt={track.name}
+                                                    className="w-14 h-14 rounded-xl shadow-lg object-cover"
+                                                />
+                                                <button
+                                                    onClick={() => handlePreview(track)}
+                                                    className={`absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl transition-opacity ${playingTrackId === track.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                                >
+                                                    {playingTrackId === track.id ? (
+                                                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M8 5v14l11-7z" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className={`font-bold truncate text-base ${playingTrackId === track.id ? 'text-[#1DB954]' : 'text-gray-900 dark:text-white'}`}>{track.name}</h3>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400 truncate font-medium">
+                                                    {track.artists.map(a => a.name).join(', ')}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => toggleFavorite(track)}
+                                                    className={`p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors ${favorites.some(f => f.id === track.id) ? 'text-[#1DB954]' : 'text-gray-400'
+                                                        }`}
+                                                >
+                                                    <svg className="w-5 h-5" fill={favorites.some(f => f.id === track.id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => removeTrack(track.id)}
+                                                    className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 transition-colors"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </SortableTrack>
+                                ))}
+                            </SortableContext>
+                        </DndContext>
                     )}
                 </div>
             </div>
@@ -403,7 +453,9 @@ export default function Dashboard() {
                                 onClick={() => setIsSearchOpen(false)}
                                 className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
                             >
-                                ✕
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
                         </div>
 
@@ -417,7 +469,11 @@ export default function Dashboard() {
                                     className="w-full px-4 py-3 pl-10 rounded-xl bg-gray-100 dark:bg-white/5 border-none focus:ring-2 focus:ring-green-500 outline-none transition-all"
                                     autoFocus
                                 />
-                                <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+                                <span className="absolute left-3 top-3.5 text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
                                 {isSearching && (
                                     <div className="absolute right-3 top-3.5 animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
                                 )}
@@ -431,45 +487,36 @@ export default function Dashboard() {
                                     return (
                                         <button
                                             key={track.id}
-                                            onClick={() => handleAddTrack(track)}
+                                            onClick={() => {
+                                                if (!isAdded) {
+                                                    handleAddTrack(track);
+                                                    setIsSearchOpen(false);
+                                                    setSearchQuery('');
+                                                }
+                                            }}
                                             disabled={isAdded}
-                                            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left group ${isAdded
-                                                ? 'bg-green-50 dark:bg-green-900/20 cursor-default'
-                                                : 'hover:bg-gray-100 dark:hover:bg-white/5'
-                                                }`}
+                                            className={`w-full p-3 rounded-xl flex items-center gap-4 transition-all ${isAdded ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                         >
-                                            <img
-                                                src={track.album.images[2]?.url || track.album.images[0]?.url}
-                                                alt={track.name}
-                                                className="w-12 h-12 rounded-md object-cover shadow-sm"
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <p className={`font-bold text-sm truncate ${isAdded ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                                                    {track.name}
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{track.artists[0].name}</p>
+                                            <img src={track.album.images[2]?.url} alt={track.name} className="w-12 h-12 rounded-lg object-cover" />
+                                            <div className="flex-1 text-left">
+                                                <h4 className="font-bold text-sm truncate">{track.name}</h4>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400">{track.artists[0].name}</p>
                                             </div>
-                                            {isAdded ? (
-                                                <span className="text-green-500 font-bold text-sm px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
-                                                    ADDED
-                                                </span>
-                                            ) : (
-                                                <span className="text-green-500 opacity-0 group-hover:opacity-100 transition-opacity font-bold text-xl">+</span>
+                                            {isAdded && (
+                                                <span className="text-green-500 text-xs font-bold">Added</span>
                                             )}
                                         </button>
                                     );
                                 })
                             ) : (
-                                <div className="text-center py-8 text-gray-500">
-                                    {searchQuery.length > 2 ? 'No songs found' : 'Type to search...'}
+                                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    {searchQuery ? "No results found" : "Start typing to search..."}
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
             )}
-
-
         </main>
     );
 }

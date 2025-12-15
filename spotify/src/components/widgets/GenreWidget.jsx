@@ -150,18 +150,23 @@ export default function GenreWidget({ selectedGenres = [], onGenreSelect, isGame
 
                 {selectedGenres.length > 0 ? (
                     <div className="flex flex-wrap gap-2 relative z-10">
-                        {selectedGenres.map(genre => (
-                            <span key={genre} className="px-3 py-1.5 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 rounded-full text-sm font-bold border border-purple-200 dark:border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.1)]">
-                                {genre}
+                        {selectedGenres.map((genre, i) => (
+                            <span
+                                key={genre}
+                                className="px-4 py-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 text-purple-700 dark:text-purple-300 rounded-xl text-sm font-bold border border-purple-200 dark:border-purple-500/30 shadow-sm hover:scale-105 transition-transform cursor-default"
+                            >
+                                # {genre}
                             </span>
                         ))}
                     </div>
                 ) : (
-                    <div className="h-40 border-2 border-dashed border-gray-300 dark:border-white/10 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 group-hover:border-purple-500/30 transition-colors bg-gray-50/50 dark:bg-white/5">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-                            <span className="text-2xl">+</span>
+                    <div className="h-40 rounded-2xl flex flex-col items-center justify-center text-gray-400 gap-3 transition-all bg-gray-50/50 dark:bg-white/5 group-hover:bg-purple-500/10 border-2 border-dashed border-gray-200 dark:border-white/10 group-hover:border-purple-500/50">
+                        <div className="w-16 h-16 rounded-full bg-white dark:bg-white/10 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <svg className="w-8 h-8 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
                         </div>
-                        <span className="text-sm font-medium">Add Genres</span>
+                        <span className="text-sm font-bold group-hover:text-purple-500 transition-colors">Add Genres</span>
                     </div>
                 )}
             </div>

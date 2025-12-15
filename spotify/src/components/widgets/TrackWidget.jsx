@@ -59,7 +59,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                             </linearGradient>
                         </defs>
                     </svg>
-                    Añade tus favoritas
+                    Add your favorites
                 </h3>
                 <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400">
                     {selectedTracks.length}/5
@@ -71,7 +71,7 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="busca canciones..."
+                    placeholder="Search songs..."
                     className="w-full bg-white/50 dark:bg-white/5 border-none rounded-xl px-4 py-3 pl-10 focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all placeholder:text-gray-400"
                 />
 
@@ -99,7 +99,11 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
                                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{track.artists[0].name}</p>
                                 </div>
                                 {selectedTracks.find(t => t.id === track.id) && (
-                                    <span className="text-green-500">✓</span>
+                                    <span className="text-green-500">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
                                 )}
                             </button>
                         ))}
@@ -108,27 +112,44 @@ export default function TrackWidget({ selectedTracks = [], onTrackSelect }) {
             </div>
 
 
-            <div className="flex flex-wrap gap-2">
+            {selectedTracks.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                    <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-3">
+                        <svg className="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                    </div>
+                    <p className="text-sm font-medium">Add songs to guide the mix...</p>
+                </div>
+            )}
+
+
+            <div className="space-y-2">
                 {selectedTracks.map((track) => (
                     <div
                         key={track.id}
-                        className="flex items-center gap-2 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 text-green-700 dark:text-[#1DB954] px-3 py-1.5 rounded-full text-sm font-bold border border-[#1DB954]/20 dark:border-[#1DB954]/30 animate-in fade-in zoom-in duration-200 shadow-[0_0_10px_rgba(29,185,84,0.1)]"
+                        className="flex items-center gap-3 bg-white dark:bg-white/5 p-2 pr-4 rounded-xl border border-gray-100 dark:border-white/5 shadow-sm group hover:border-[#1DB954]/30 transition-all"
                     >
-                        <span className="max-w-[100px] truncate">{track.name}</span>
+                        <img
+                            src={track.album.images[2]?.url || track.album.images[0]?.url}
+                            alt={track.name}
+                            className="w-10 h-10 rounded-lg object-cover shadow-sm"
+                        />
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate text-gray-900 dark:text-white">{track.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{track.artists[0].name}</p>
+                        </div>
                         <button
                             onClick={() => handleSelect(track)}
-                            className="hover:text-green-900 dark:hover:text-green-100 transition-colors"
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/20 transition-colors"
                         >
-                            ×
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                 ))}
-                {selectedTracks.length === 0 && (
-                    <p className="text-sm text-gray-400 italic w-full text-center py-2">
-                        Add songs to guide the mix...
-                    </p>
-                )}
             </div>
-        </div>
+        </div >
     );
 }

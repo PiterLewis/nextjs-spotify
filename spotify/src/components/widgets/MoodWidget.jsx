@@ -3,12 +3,36 @@
 import { useState } from 'react';
 
 const MOODS = [
-    { label: 'Happy', value: 'happy', icon: '😊' },
-    { label: 'Sad', value: 'sad', icon: '😢' },
-    { label: 'Energetic', value: 'energetic', icon: '⚡' },
-    { label: 'Calm', value: 'calm', icon: '😌' },
-    { label: 'Romantic', value: 'romantic', icon: '❤️' },
-    { label: 'Focus', value: 'focus', icon: '🧠' },
+    {
+        label: 'Happy',
+        value: 'happy',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    },
+    {
+        label: 'Sad',
+        value: 'sad',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    },
+    {
+        label: 'Energetic',
+        value: 'energetic',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+    },
+    {
+        label: 'Calm',
+        value: 'calm',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+    },
+    {
+        label: 'Romantic',
+        value: 'romantic',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+    },
+    {
+        label: 'Focus',
+        value: 'focus',
+        icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+    },
 ];
 
 function MoodSelectionContent({ selectedMood, onMoodSelect, isGameMode, setIsOpen }) {
@@ -54,39 +78,40 @@ export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = fa
         <div className="relative">
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className="bg-white/60 dark:bg-black/40 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 hover:border-yellow-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(234,179,8,0.15)] hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between"
+                className="bg-white/60 dark:bg-black/40 backdrop-blur-xl rounded-[2rem] p-6 border border-gray-200 dark:border-white/5 hover:border-yellow-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(234,179,8,0.15)] hover:-translate-y-1 cursor-pointer h-full flex flex-col justify-between group"
             >
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8">
-                        <defs>
-                            <linearGradient id="mood-gradient-premium" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%" stopColor="#FCD34D" />
-                                <stop offset="50%" stopColor="#F59E0B" />
-                                <stop offset="100%" stopColor="#ffffffff" />
-                            </linearGradient>
-                            <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feDropShadow dx="0" dy="1" stdDeviation="1" floodOpacity="0.3" />
-                            </filter>
-                        </defs>
-                        <g filter="url(#soft-shadow)">
-                            <circle cx="12" cy="12" r="10" fill="url(#mood-gradient-premium)" />
-                            <path d="M8.5 9.5c.83 0 1.5-.67 1.5-1.5S9.33 6.5 8.5 6.5 7 7.17 7 8s.67 1.5 1.5 1.5zm7 0c.83 0 1.5-.67 1.5-1.5S16.33 6.5 15.5 6.5 14 7.17 14 8s.67 1.5 1.5 1.5zm-3.5 8c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="#FFF" fillOpacity="0.95" />
-                        </g>
-                    </svg>
-                    Mood
-                </h3>
-                <div className="h-12 bg-gray-100 dark:bg-black/40 rounded-lg flex items-center justify-center text-sm font-medium text-gray-500 dark:text-gray-300">
-                    {currentMood.label}
+                <div>
+                    <h3 className="text-lg font-bold mb-1 flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                        <span className="p-2 rounded-xl bg-yellow-500/10 text-yellow-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                            </svg>
+                        </span>
+                        Mood
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 pl-1">Vibe check</p>
+                </div>
+
+                <div className="flex items-center gap-3 mt-4">
+                    <span className="text-4xl filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">{currentMood.icon}</span>
+                    <span className="text-xl font-bold text-gray-900 dark:text-white">{currentMood.label}</span>
                 </div>
             </div>
 
             {isOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setIsOpen(false)}
-                    ></div>
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-white/10 z-20 overflow-hidden">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-sm shadow-2xl border border-gray-200 dark:border-white/10 animate-in zoom-in-95 duration-200 overflow-hidden">
+                        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+                            <h3 className="text-lg font-bold">Select Mood</h3>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="p-2 hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                         <MoodSelectionContent
                             selectedMood={selectedMood}
                             onMoodSelect={onMoodSelect}
@@ -94,7 +119,7 @@ export default function MoodWidget({ selectedMood, onMoodSelect, isGameMode = fa
                             setIsOpen={setIsOpen}
                         />
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

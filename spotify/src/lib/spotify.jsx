@@ -202,7 +202,7 @@ export async function savePlaylistToSpotify(tracks, name = "My AI Mix") {
         },
         body: JSON.stringify({
             name: name,
-            description: "Generated with Spotify Taste Mixer 🎛️",
+            description: "Generated with Spotify Taste Mixer",
             public: false
         })
     });
