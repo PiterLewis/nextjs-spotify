@@ -71,7 +71,7 @@ export default function Home() {
 
 
       <footer className="p-6 text-center text-sm text-gray-500 dark:text-gray-400 z-10">
-        <p>© 2024 Spotify Taste Mixer • Academic Project</p>
+        <p>© 2025 Spotify Taste Mixer • Academic Project</p>
       </footer>
 
     </main>

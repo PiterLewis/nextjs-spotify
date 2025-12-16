@@ -204,7 +204,7 @@ export default function Dashboard() {
 
     return (
         <main className="p-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Ambient Background */}
+
             <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[#1DB954]/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
             <div className="col-span-1 lg:col-span-12 mb-12 flex justify-between items-end relative z-10">

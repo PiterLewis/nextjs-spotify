@@ -57,7 +57,6 @@ export default function HistoryPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-[#000000] text-black dark:text-white p-6 md:p-12 font-sans selection:bg-green-500 selection:text-black transition-colors duration-300 relative overflow-hidden">
-            {/* Ambient Background */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[#1DB954]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
             {toast && (
