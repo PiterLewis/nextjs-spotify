@@ -4,10 +4,10 @@ import Link from 'next/link';
 
 export default function NotFound() {
     return (
-        <div className="min-h-screen bg-[#000000] text-white flex items-center justify-center p-6 relative overflow-hidden font-sans selection:bg-green-500 selection:text-black">
+        <div className="min-h-screen bg-[#121212] dark:bg-[#000000] text-white flex items-center justify-center p-6 relative overflow-hidden font-sans selection:bg-green-500 selection:text-black">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] md:w-[800px] md:h-[800px] bg-[#1DB954]/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
 
-            <div className="relative z-10 max-w-2xl w-full bg-white/5 backdrop-blur-2xl rounded-[3rem] p-8 md:p-16 border border-white/10 shadow-2xl text-center transform hover:scale-[1.01] transition-transform duration-500">
+            <div className="relative z-10 max-w-2xl w-full bg-white/5 dark:bg-[#121212] backdrop-blur-2xl rounded-[3rem] p-8 md:p-16 border border-white/10 shadow-2xl text-center transform hover:scale-[1.01] transition-transform duration-500">
 
                 <div className="mb-8 flex justify-center relative">
                     <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-full"></div>
